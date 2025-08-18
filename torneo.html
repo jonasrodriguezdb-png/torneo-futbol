@@ -2,44 +2,21 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Fixture Torneo</title>
+<title>Torneo Futbol 5to</title>
 <style>
-  body { font-family: Arial, sans-serif; margin: 20px; background:#f7f7f7; }
-  h2 { background: #4CAF50; color: white; padding: 10px; border-radius: 5px; }
+  body { font-family: Arial; margin: 20px; background: #f7f7f7; }
+  h2 { background: #4CAF50; color: white; padding: 8px; border-radius: 5px; }
   table { border-collapse: collapse; width: 100%; margin-bottom: 30px; background: white; }
   th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
   th { background: #eee; }
-  input { width: 50px; }
-  .container { margin-bottom: 40px; }
 </style>
 </head>
 <body>
-
 <h1>Fixture Torneo – 3 días, 2 canchas</h1>
 
-<!-- Lista de equipos y jugadores -->
-<script>
-const partidos = [
-  {num:1,dia:1,cancha:1,hora:"13:20",A:"La Chispita ⚡️",B:"Viru FC"},
-  {num:2,dia:1,cancha:2,hora:"13:20",A:"A la Lula",B:"La Favorita"},
-  {num:3,dia:1,cancha:1,hora:"13:45",A:"Marcelu FC",B:"Real Suciedad"},
-  {num:4,dia:1,cancha:2,hora:"13:45",A:"Chispita Esperanza",B:"Pinchila FC"},
-  {num:5,dia:1,cancha:1,hora:"14:10",A:"Chasquipom",B:"Marisol FC"},
-  {num:6,dia:1,cancha:2,hora:"14:10",A:"La Chispita ⚡️",B:"A la Lula"},
-  {num:7,dia:2,cancha:1,hora:"13:20",A:"Viru FC",B:"Marcelu FC"},
-  {num:8,dia:2,cancha:2,hora:"13:20",A:"La Favorita",B:"Chispita Esperanza"},
-  {num:9,dia:2,cancha:1,hora:"13:45",A:"Real Suciedad",B:"Chasquipom"},
-  {num:10,dia:2,cancha:2,hora:"13:45",A:"Pinchila FC",B:"Marisol FC"},
-  {num:11,dia:2,cancha:1,hora:"14:10",A:"La Chispita ⚡️",B:"Marcelu FC"},
-  {num:12,dia:2,cancha:2,hora:"14:10",A:"A la Lula",B:"Real Suciedad"},
-  {num:13,dia:3,cancha:1,hora:"13:20",A:"Viru FC",B:"La Favorita"},
-  {num:14,dia:3,cancha:2,hora:"13:20",A:"Chispita Esperanza",B:"Chasquipom"},
-  {num:15,dia:3,cancha:1,hora:"13:45",A:"Pinchila FC",B:"Marisol FC"},
-  {num:16,dia:3,cancha:2,hora:"14:10",A:"Semifinal 1",B:"Semifinal 1"},
-  {num:17,dia:3,cancha:1,hora:"14:10",A:"Semifinal 2",B:"Semifinal 2"},
-  {num:18,dia:3,cancha:2,hora:"14:30",A:"Final",B:"Final"},
-];
+<div id="torneo"></div>
 
+<script>
 const jugadores = {
   "La Chispita ⚡️":["Mateo Rezmasud","Matias Pandolfi","Lionel Altamiranda","Benjamin Diaz","Juanfra Ortiz","Gael Ruiz","Joaquin Poggi"],
   "A la Lula":["Maximo Camargo","Ismael Orozco","Joaquin Orihuela","Tiziano Cordi","Santino Carlavan","Urbano De Lucia","Ian Chicala"],
@@ -50,33 +27,41 @@ const jugadores = {
   "Pinchila FC":["Tin","Bauti","Ciro","Ramy","Gero","Tomy"],
   "Chasquipom":["Joaquin Tirenti","Joaquin Gonzalez","Julian Peccinetti","Ignacio Lezcano","Parma Emilio Oggier Simón","Ignacio Cerda","Ruiz Gael","Bautista Caribe","Joaquin Villagra","Joaquin Rodriguez"],
   "Marisol FC":["Lautaro González","Emiliano Díaz","Lautaro Occhipinti","Fabrizio Ávila","Benjamín Muñoz","Valentino D'Ambrosio","Benjamín Acet","Maximo Ferreira"],
-  "Viru FC":["Laureano Tomaselli","Tomás Gutierrez","Bautista Manno","Ticiano Moretti","Benjamin Olmedo","Thiago Kozusnik","Maximiliano Zorrilla","Facundo Bodar","David Mamani"]
+  "Viru FC":["Laureano Tomaselli","Tomás Gutierrez","Bautista Manno","Ticiano Moretti","Benjamin Olmedo","Thiago Kozusnik","Maximiliano Zorrilla","Facundo Bodar","David Mamani""]
 };
 
-function crearPartido(p){
-  const jugA = jugadores[p.A] || ["Jugador TBD"];
-  const jugB = jugadores[p.B] || ["Jugador TBD"];
-  const maxLen = Math.max(jugA.length,jugB.length);
+async function cargarResultados(){
+  const res = await fetch('resultados.json');
+  const data = await res.json();
+  const cont = document.getElementById('torneo');
+  cont.innerHTML = '';
 
-  let html = `<div class="container"><h2>Partido ${p.num} – ${p.A} vs ${p.B} – Cancha ${p.cancha} – Hora ${p.hora}</h2>
-  <table><tr>
-  <th>Jugador A</th><th>Faltas</th><th>🟨</th><th>🟥</th><th>Goles</th>
-  <th>Jugador B</th><th>Faltas</th><th>🟨</th><th>🟥</th><th>Goles</th>
-  </tr>`;
-  for(let i=0;i<maxLen;i++){
-    html+=`<tr>
-      <td>${jugA[i]||""}</td><td><input></td><td><input></td><td><input></td><td><input></td>
-      <td>${jugB[i]||""}</td><td><input></td><td><input></td><td><input></td><td><input></td>
+  data.partidos.forEach(p=>{
+    const jugA = jugadores[p.equipoA] || [];
+    const jugB = jugadores[p.equipoB] || [];
+    const maxLen = Math.max(jugA.length,jugB.length);
+
+    let html = `<div><h2>Partido ${p.num} – ${p.equipoA} vs ${p.equipoB}</h2>
+    <p>Resultado Final: ${p.resultado || ''}</p>
+    <table>
+    <tr>
+      <th>Jugador A</th><th>Goles</th>
+      <th>Jugador B</th><th>Goles</th>
     </tr>`;
-  }
-  html+=`</table><p>Resultado Final: <input> – <input></p></div>`;
-  return html;
+
+    for(let i=0;i<maxLen;i++){
+      html+=`<tr>
+        <td>${jugA[i]||''}</td><td>${(p.jugadoresA && p.jugadoresA[i]?.goles)||''}</td>
+        <td>${jugB[i]||''}</td><td>${(p.jugadoresB && p.jugadoresB[i]?.goles)||''}</td>
+      </tr>`;
+    }
+
+    html+='</table></div>';
+    cont.innerHTML += html;
+  });
 }
 
-partidos.forEach(p=>{
-  document.write(crearPartido(p));
-});
+cargarResultados();
 </script>
-
 </body>
 </html>
